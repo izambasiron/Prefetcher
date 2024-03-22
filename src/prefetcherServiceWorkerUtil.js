@@ -1,31 +1,22 @@
-/**
- * This service worker is responsible for prefetching resources.
- * It listens for messages from the client to start prefetching resources.
- * It also sends a message to the client when prefetching is complete.
- * @see prefetcher.js
- * @see https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API
- * @author Izam Basiron
- */
-let fetchQueue = [];
+const fetchQueue = [];
 let isProcessingQueue = false;
-let fetchDelay = 1000;
+let fetchDelay = 0;
 
-async function fetchAndCache(url) {
+const fetchAndCache = async (url) => {
     fetch(url).then(response => {
         if (response.ok) {
-            console.debug(`Prefetched: ${url}`);
+            // console.debug(`Prefetched: ${url}`);
         } else {
             console.error(`Failed to fetch ${url}`);
         }
     }).catch(error => {
         console.error(`Error fetching ${url}: `, error);
     });
-}
+};
 
-function processQueue() {
+const processQueue = () => {
     isProcessingQueue = true;
     if (fetchQueue.length === 0) {
-        console.log('Prefetch complete');
         isProcessingQueue = false;
 
         self.clients.matchAll().then(clients => {
@@ -44,23 +35,23 @@ function processQueue() {
             processQueue();
         });
     }, fetchDelay);
-}
+};
 
-function enqueueFetch(url) {
+const enqueueFetch = (url) => {
     fetchQueue.push(url);
     if (!isProcessingQueue) {
         processQueue();
     }
-}
+};
 
-function shouldBePrefetched(url, includeList, excludeList) {
+const shouldBePrefetched = (url, includeList, excludeList) => {
     const isIncluded = includeList.length === 0 || includeList.some(regex => regex.test(url));
     const isExcluded = excludeList.some(regex => regex.test(url));
 
     return isIncluded && !isExcluded;
-}
+};
 
-function prioritizeUrls(urls, priorityPatterns) {
+const prioritizeUrls = (urls, priorityPatterns) => {
     const priorities = priorityPatterns.map(pattern => new RegExp(pattern, 'i'));
 
     return urls.sort((a, b) => {
@@ -69,11 +60,12 @@ function prioritizeUrls(urls, priorityPatterns) {
 
         return priorityA - priorityB || a.localeCompare(b);
     });
-}
+};
 
-function startPrefetching(manifest, includeList, excludeList, priorityPatterns) {
+export const startPrefetching = (manifest, includeList, excludeList, priorityPatterns, delay) => {
     let resources = manifest.manifest.urlVersions;
     let urls = [];
+    fetchDelay = delay;
     for (const path in resources) {
         const versionQuery = resources[path];
         const fullUrl = `${location.origin}${path}${versionQuery}`;
@@ -98,22 +90,21 @@ function startPrefetching(manifest, includeList, excludeList, priorityPatterns) 
             enqueueFetch(url);
         }
     });
+};
+
+// Conditional exports for testing
+const _testExports = {};
+
+if (process.env.NODE_ENV === 'test') {
+  Object.assign(_testExports, {
+    fetchAndCache,
+    processQueue,
+    enqueueFetch,
+    shouldBePrefetched,
+    prioritizeUrls,
+    startPrefetching,
+    fetchQueue,
+  });
 }
 
-/**
- * So that clients loaded in the same scope do not need to be reloaded
- * before their fetches will go through this service worker.
- * @see https://developer.mozilla.org/en-US/docs/Web/API/Clients/claim
- */
-self.addEventListener('activate', (event) => {
-    event.waitUntil(clients.claim());
-});
-
-self.addEventListener('message', event => {
-    const data = event.data;
-    if (data.action === 'prefetchResources') {
-        const { manifest, includeList, excludeList, priorityPatterns, delay } = data;
-        fetchDelay = delay;
-        startPrefetching(manifest, includeList, excludeList, priorityPatterns);
-    }
-});
+export { _testExports };

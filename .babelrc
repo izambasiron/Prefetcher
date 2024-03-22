@@ -1,0 +1,10 @@
+{
+    "presets": [
+        [
+          "@babel/preset-env",
+          {
+            "targets": "last 2 years, not dead, not < 2%"
+          }
+        ]
+      ]
+}
