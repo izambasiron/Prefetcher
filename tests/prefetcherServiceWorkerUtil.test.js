@@ -4,10 +4,6 @@ describe('Service Worker logic', () => {
     // Mock global functions
     beforeAll(() => {
         global.fetch = jest.fn().mockImplementation(() => Promise.resolve({ ok: true }));
-        // global.clients = {
-        //     matchAll: jest.fn().mockImplementation(() => Promise.resolve([{ postMessage: jest.fn() }])),
-        // };
-        // Prepare a mock for postMessage
         const postMessageMock = jest.fn();
 
         // Mock implementation of clients.matchAll to return an array of objects, each with a postMessage function
@@ -24,7 +20,6 @@ describe('Service Worker logic', () => {
         };
         global.location = {
             origin: 'https://example.com',
-            // Add any other properties you use from the `location` object
         };
     });
 
@@ -76,7 +71,6 @@ describe('Service Worker logic', () => {
     });
 
     it('sends prefetchComplete message after processing queue', async () => {
-        // _testExports.fetchQueue = [];
         _testExports.fetchQueue.push('https://example.com');
         await _testExports.processQueue();
 

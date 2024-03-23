@@ -24,7 +24,6 @@ global.requestIdleCallback = jest.fn().mockImplementation(callback => {
     // Simulate immediate execution
     callback();
 });
-// Mock requestIdleCallback
 global.window = {
     requestIdleCallback: global.requestIdleCallback,
 };
@@ -95,7 +94,5 @@ describe('Prefetcher Tests', () => {
             removeEventListener();
             expect(global.navigator.serviceWorker.removeEventListener).toHaveBeenCalledWith('message', expect.any(Function));
         });
-
-        // Add more integration tests for the public API as needed
     });
 });

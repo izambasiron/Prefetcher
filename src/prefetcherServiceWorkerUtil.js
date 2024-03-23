@@ -4,9 +4,7 @@ let fetchDelay = 0;
 
 const fetchAndCache = async (url) => {
     fetch(url).then(response => {
-        if (response.ok) {
-            // console.debug(`Prefetched: ${url}`);
-        } else {
+        if (!response.ok) {
             console.error(`Failed to fetch ${url}`);
         }
     }).catch(error => {
@@ -95,7 +93,7 @@ export const startPrefetching = (manifest, includeList, excludeList, priorityPat
 // Conditional exports for testing
 const _testExports = {};
 
-if (process.env.NODE_ENV === 'test') {
+if (process.env.TESTING) {
   Object.assign(_testExports, {
     fetchAndCache,
     processQueue,
