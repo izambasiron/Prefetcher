@@ -54,18 +54,5 @@ const mainConfig = {
   ],
 };
 
-// Configuration for the service worker
-const serviceWorkerConfig = {
-  ...baseConfig,
-  entry: {
-    'prefetcher-service-worker': './src/prefetcherServiceWorker.js'
-  },
-  output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: 'prefetcher-service-worker.js'
-  },
-  target: 'webworker', // Target webworker environment
-};
-
-// Export both configurations as an array
-module.exports = [mainConfig, serviceWorkerConfig];
+// Export only the main configuration
+module.exports = mainConfig;
