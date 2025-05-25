@@ -5,24 +5,21 @@ Prefetcher is a lightweight JavaScript tool designed to enhance the performance 
 Web applications often experience lag during navigation due to large resource files, such as JavaScript libraries, which lead to slow screen loads. This issue, characterized by a delay between user interaction and screen transition, is what some might call response latency, jank or interaction inertia.
 
 ## What This Does
-Prefetcher relies on OutSystems application manifest, which can be found in the browser's local storage (found under `$OS_<ModuleName>$ApplicationInfo`). This tool empowers developers to specify which resources from the manifest to download, which to exclude, and the sequence of loading. It employs a service worker to fetch these assets, effectively "warming up" the browser cache and keeping the main thread unoccupied for optimal user experience. Prefetcher is designed for simplicity, bypassing the Cache API and not providing offline capabilities.
+Prefetcher relies on OutSystems application manifest, which can be found in the browser's local storage (found under `$OS_<ModuleName>$ApplicationInfo`). This tool empowers developers to specify which resources from the manifest to download, which to exclude, and the sequence of loading. It dynamically creates and appends `<link rel="preload">` tags to the document's `<head>`. This hints to the browser that these resources will be needed soon, allowing the browser to fetch them with appropriate priority, effectively "warming up" the browser cache and keeping the main thread less occupied during critical rendering phases. Prefetcher is designed for simplicity, bypassing the Cache API and not providing offline capabilities.
 
 ## Key Features
-- Utilizes a service worker to offload fetching tasks.
-- Relies on the browser's native cache for simplicity.
+- Leverages the browser's native caching mechanisms via `<link rel="preload">`.
 - Lightweight, non-intrusive addition to existing OutSystems projects.
-- Employs requestIdleCallback avoiding network congestion.
+- Employs `requestIdleCallback` avoiding network congestion and keeping the main thread free.
 
 ## How to Use
 Step 1: Add the Prefetcher component on the desired screens. Configure the following parameters where necessary:
 - Include: Regex patterns for assets to prefetch from the Manifest.
 - Exclude: Regex patterns for assets to exclude from prefetching.
 - Order: Prioritize the order of asset prefetching (e.g., ".js", ".css").
-- Delay: Time in milliseconds to wait between prefetching assets.
+- Delay: Time in milliseconds to wait before initiating prefetching.
 
-Step 2: Manually add `prefetch-service-worker.js` to your module's Resources due to service worker scope requirements. Find this file in the Prefetch module's Resources, save it without renaming, and import it as a Resource and set for **"Deploy to Target Directory"**.
-
-Step 3: Publish your module, navigate to your app's screen where prefetching should occur, and open the browser's developer tools to confirm that the Prefetcher service worker is registered and actively prefetching the defined assets.
+Step 2: Publish your module, navigate to your app's screen where prefetching should occur, and open the browser's developer tools (Network tab or Elements tab by inspecting the `<head>`) to confirm that `<link rel="preload">` tags for the defined assets are being added to the page.
 
 ## Contribute
 I welcome contributions to Prefetcher! If you have any ideas, suggestions, or bug reports, please submit an issue or a pull request.
